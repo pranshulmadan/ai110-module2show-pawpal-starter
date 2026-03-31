@@ -4,8 +4,62 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+Three core tasks: Should be able to add a pet, schedule feeding sessions, and see what tasks need to be done today.
+
+1st class: Owner - Represents the person caring for the pet.
+
+Attributes:
+name
+daily_time_available
+preferences
+
+Methods:
+set_time_available()
+update_preferences()
+
+2nd class: Pet - represents the pet
+
+Attributes:
+name
+species
+age
+energy_level
+special_needs
+
+Methods:
+update_info()
+get_summary()
+
+3rd class: Task - Reperesents a pet care task
+
+Attributes:
+task_name
+category
+duration
+priority
+preferred_time
+is_required
+
+Methods:
+edit_task()
+mark_complete()
+fits_time(available_time)
+
+
+4th class: Scheduler - Creates the daily plan
+
+Attributes:
+owner
+pet
+tasks
+daily_plan
+
+Methods:
+generate_plan()
+sort_tasks_by_priority()
+select_tasks()
+explain_plan()
+
 
 **b. Design changes**
 
