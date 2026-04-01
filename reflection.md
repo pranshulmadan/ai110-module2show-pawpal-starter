@@ -60,11 +60,64 @@ sort_tasks_by_priority()
 select_tasks()
 explain_plan()
 
+I chose four classes: Owner, Pet, Task, and Scheduler. Owner stores information about the pet owner, like their name, available time, and preferences. Pet stores the pet’s basic details, such as name, species, age, energy level, and special needs.
+
+Task represents each care activity the pet needs, like feeding, walking, or grooming, along with details like duration, priority, and preferred time. Scheduler is the main planning class that uses the owner, pet, and task information to build a daily plan by sorting tasks and selecting the ones that fit the owner’s available time.
+
+classDiagram
+    class Owner {
+        +String name
+        +int daily_time_available
+        +Map preferences
+        +set_time_available()
+        +update_preferences()
+    }
+
+    class Pet {
+        +String name
+        +String species
+        +int age
+        +String energy_level
+        +String special_needs
+        +update_info()
+        +get_summary()
+    }
+
+    class Task {
+        +String task_name
+        +String category
+        +int duration
+        +int priority
+        +String preferred_time
+        +bool is_required
+        +edit_task()
+        +mark_complete()
+        +fits_time(available_time)
+    }
+
+    class Scheduler {
+        +Owner owner
+        +Pet pet
+        +List~Task~ tasks
+        +List~Task~ daily_plan
+        +generate_plan()
+        +sort_tasks_by_priority()
+        +select_tasks()
+        +explain_plan()
+    }
+
+    Scheduler --> Owner
+    Scheduler --> Pet
+    Scheduler --> Task : manages
+    Pet --> Task : has
 
 **b. Design changes**
 
 - Did your design change during implementation?
+Yes my design changed during implementation.
 - If yes, describe at least one change and why you made it.
+
+One change I made was adding a clearer connection between Pet and Task in the design/code. I made this change because my original UML showed that a pet “has” tasks, but the code did not actually store or link tasks to a specific pet. Updating that relationship made the system more logical, since care tasks like feeding, walking, and grooming are meant to belong to a pet’s care plan.
 
 ---
 
