@@ -1,4 +1,4 @@
-from pawpal_system import Owner, Pet, Task
+from pawpal_system import Owner, Pet, Task, Scheduler
 
 
 def main() -> None:
@@ -47,8 +47,9 @@ def main() -> None:
         category="play",
         duration=20,
         priority=3,
-        preferred_time="10:00",
+        preferred_time="08:00",
         is_required=False,
+        pet_name="Mittens",
     )
 
     grooming = Task(
@@ -58,6 +59,7 @@ def main() -> None:
         priority=2,
         preferred_time="18:00",
         is_required=False,
+        pet_name="Mittens",
     )
 
     buddy.add_task(morning_walk)
@@ -65,16 +67,38 @@ def main() -> None:
     mittens.add_task(play_time)
     mittens.add_task(grooming)
 
-    print("Today's Schedule")
-    print(f"Owner: {owner.name}")
-    print(f"Available time: {owner.daily_time_available} minutes\n")
+    # Add tasks out of order and introduce same-time conflicts.
+    late_snack = Task(
+        task_name="Late snack",
+        category="feeding",
+        duration=10,
+        priority=2,
+        preferred_time="08:00",
+        is_required=False,
+        pet_name="Buddy",
+    )
+    buddy.add_task(late_snack)
 
-    for pet in (buddy, mittens):
-        for task in pet.tasks:
-            print(
-                f"- {task.task_name} for {pet.name} at {task.preferred_time} "
-                f"({task.duration} min, category={task.category})"
-            )
+    out_of_order_tasks = [grooming, breakfast, late_snack, morning_walk, play_time]
+
+    scheduler = Scheduler(owner=owner, pet=buddy, tasks=out_of_order_tasks)
+
+    print("Tasks before sort_by_time:")
+    for task in scheduler.tasks:
+        print(f"- {task.task_name} ({task.pet_name}) at {task.preferred_time}")
+
+    scheduler.sort_by_time()
+    print("\nTasks after sort_by_time:")
+    for task in scheduler.tasks:
+        print(f"- {task.task_name} ({task.pet_name}) at {task.preferred_time}")
+
+    print("\nConflict warnings:")
+    warnings = scheduler.detect_conflicts()
+    if warnings:
+        for warning in warnings:
+            print(f"- {warning}")
+    else:
+        print("- No conflicts detected.")
 
 
 if __name__ == "__main__":

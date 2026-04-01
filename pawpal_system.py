@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 
 
 class Owner:
@@ -51,6 +52,8 @@ class Pet:
 
     def add_task(self, task: Task) -> None:
         """Attach a task to this pet."""
+        if task.pet_name is None:
+            task.pet_name = self.name
         self.tasks.append(task)
 
     def get_summary(self) -> str:
@@ -69,7 +72,10 @@ class Task:
     priority: int
     preferred_time: str
     is_required: bool
+    pet_name: str | None = None
     completed: bool = field(default=False)
+    recurrence: str = "once"
+    due_date: date | None = None
 
     def edit_task(self, **kwargs) -> None:
         """Edit task properties with basic validation."""
@@ -80,11 +86,34 @@ class Task:
                 raise ValueError("Task duration must be non-negative.")
             if key == "priority" and value is not None and value < 0:
                 raise ValueError("Task priority must be non-negative.")
+            if key == "recurrence" and value not in ("once", "daily", "weekly"):
+                raise ValueError("Recurrence must be 'once', 'daily', or 'weekly'.")
             setattr(self, key, value)
 
-    def mark_complete(self) -> None:
-        """Mark the task as completed."""
+    def mark_complete(self) -> Task | None:
+        """Mark the task as completed and return the next occurrence if recurring."""
         self.completed = True
+        return self.next_occurrence_task()
+
+    def next_occurrence_task(self) -> Task | None:
+        """Create the next recurring task instance using daily or weekly timedelta."""
+        if self.recurrence not in ("daily", "weekly"):
+            return None
+
+        increment = timedelta(days=1 if self.recurrence == "daily" else 7)
+        base_date = self.due_date or date.today()
+        next_date = base_date + increment
+
+        return Task(
+            task_name=self.task_name,
+            category=self.category,
+            duration=self.duration,
+            priority=self.priority,
+            preferred_time=self.preferred_time,
+            is_required=self.is_required,
+            recurrence=self.recurrence,
+            due_date=next_date,
+        )
 
     def fits_time(self, available_time: int) -> bool:
         """Return True if this task can fit in the available time."""
@@ -98,10 +127,11 @@ class Scheduler:
         self.pet = pet
         self.tasks = tasks
         self.daily_plan: list[Task] = []
-        self.pet.tasks.extend(task for task in tasks if task not in self.pet.tasks)
+        self.conflict_warnings: list[str] = []
 
     def generate_plan(self) -> list[Task]:
         """Build a daily plan from available tasks."""
+        self.conflict_warnings = self.detect_conflicts()
         self.sort_tasks_by_priority()
         self.select_tasks()
         return self.daily_plan
@@ -124,6 +154,50 @@ class Scheduler:
         """Sort tasks so required and preferred items are chosen first."""
         self.tasks.sort(key=self._task_sort_key)
 
+    def sort_by_time(self) -> None:
+        """Sort tasks by preferred start time using the HH:MM string value."""
+        self.tasks = sorted(self.tasks, key=lambda task: task.preferred_time)
+
+    def detect_conflicts(self) -> list[str]:
+        """Detect same-time scheduling conflicts and return warning messages."""
+        warnings: list[str] = []
+        tasks_by_time: dict[str, list[Task]] = {}
+        for task in self.tasks:
+            if task.completed:
+                continue
+            tasks_by_time.setdefault(task.preferred_time, []).append(task)
+
+        for time_slot, tasks in tasks_by_time.items():
+            if len(tasks) < 2:
+                continue
+            by_pet: dict[str, list[Task]] = {}
+            for task in tasks:
+                pet_key = task.pet_name or "Unknown"
+                by_pet.setdefault(pet_key, []).append(task)
+
+            for pet_name, pet_tasks in by_pet.items():
+                if len(pet_tasks) > 1:
+                    names = ", ".join(t.task_name for t in pet_tasks)
+                    warnings.append(
+                        f"Conflict at {time_slot} for same pet {pet_name}: {names}."
+                    )
+            if len(by_pet) > 1:
+                names = ", ".join(
+                    f"{task.task_name} ({task.pet_name or 'Unknown'})" for task in tasks
+                )
+                warnings.append(f"Conflict at {time_slot} between pets: {names}.")
+        return warnings
+
+    def filter_tasks(self, completed: bool | None = None, pet_name: str | None = None) -> list[Task]:
+        """Return tasks filtered by completion state and pet name if provided."""
+        if pet_name is not None and pet_name != self.pet.name:
+            return []
+
+        filtered_tasks = self.tasks
+        if completed is not None:
+            filtered_tasks = [task for task in filtered_tasks if task.completed == completed]
+        return filtered_tasks
+
     def select_tasks(self) -> None:
         """Select tasks that fit into the owner's available time."""
         available_time = self.owner.daily_time_available
@@ -135,6 +209,15 @@ class Scheduler:
                 continue
             self.daily_plan.append(task)
             available_time -= task.duration
+
+    def complete_task(self, task: Task) -> Task | None:
+        """Mark a task completed and enqueue a new recurrence task if it repeats."""
+        next_task = task.mark_complete()
+        if next_task is not None:
+            self.tasks.append(next_task)
+            if next_task not in self.pet.tasks:
+                self.pet.tasks.append(next_task)
+        return next_task
 
     def explain_plan(self) -> str:
         """Return a simple explanation of the generated daily plan."""
