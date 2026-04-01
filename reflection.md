@@ -125,13 +125,14 @@ One change I made was adding a clearer connection between Pet and Task in the de
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler checks a few key constraints: owner available time, task priority, whether a task is required, task completion status, and owner preferences for preferred/avoided categories. I prioritized required tasks first, then preferred categories and higher-priority tasks, because a pet owner needs essential care done before optional items, and preferences help make the daily plan more useful.
 
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+One different tradeoff is that the scheduler only returns warnings instead of trying to fully resolve overlaps. That is reasonable because it keeps the planner simple and still surfaces scheduling issues for the owner without making the app crash or overcomplicating the algorithm.
 
 ---
 

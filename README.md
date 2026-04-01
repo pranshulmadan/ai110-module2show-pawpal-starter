@@ -41,3 +41,8 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+
+Smarter Scheduling
+
+I added recurring task support so Task objects can now store recurrence and due date, and when a daily or weekly task is completed the system can create the next occurrence automatically. I also added a scheduler method to sort tasks by preferred time, plus a conflict detection method that returns warnings when tasks overlap at the same time, including conflicts for the same pet or across pets. Filtering now supports completion status and pet name, and completing a task can enqueue the next recurring task if needed. Finally, the app now persists Owner and Pet in session state and builds real Task objects from the UI, and the script was updated to exercise the new sorting, filtering, and conflict detection behavior.
