@@ -141,13 +141,21 @@ One different tradeoff is that the scheduler only returns warnings instead of tr
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+
+I used AI for brainstorming, debugging, and refactoring.
+
 - What kinds of prompts or questions were most helpful?
+
+Asking it to add logic to the Task and Scheduler class.
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
 
+I did not accept the scheduling suggestion as is because it didnt add the tasks properly so I had to make it so it would add the tasks correctly.
+
+- How did you evaluate or verify what the AI suggested?
+I made sure if the suggestion actually worked.
 ---
 
 ## 4. Testing and Verification
@@ -157,11 +165,16 @@ One different tradeoff is that the scheduler only returns warnings instead of tr
 - What behaviors did you test?
 - Why were these tests important?
 
+The tests cover basic task completion and pet task assignment, verify sorting tasks by preferred time, creating the next occurrence for daily recurring tasks, and detecting same-time conflict warnings for both same-pet and cross-pet schedules.
+
+These tests are important because they verify the core scheduler behaviors that keep the app correct: task state changes, task ordering, recurring task creation, and conflict detection. That gives confidence the planner will produce reliable schedules and catch key edge cases instead of silently producing wrong or impossible plans.
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+I am very confident that it works correctly.
 - What edge cases would you test next if you had more time?
 
+I would test multiple pets with conflicting same-time tasks and tasks that exactly fill the owner’s available time.
 ---
 
 ## 5. Reflection
@@ -170,10 +183,16 @@ One different tradeoff is that the scheduler only returns warnings instead of tr
 
 - What part of this project are you most satisfied with?
 
+I’m most satisfied with making the scheduler actually work: adding task recurrence, conflict detection, and then connecting that logic to the UI so the app can generate real, sorted schedules.
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+I would improve the scheduler by making conflict resolution smarter instead of just warning, and redesign the task model so multiple pets and shared owner schedules are handled more explicitly. A second iteration would also tighten the UI flow, with clearer task editing, better validation, and a more polished display of the generated plan and warnings.
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+I learned that using AI is most effective when I treat suggestions as a starting point and then verify them against the actual code, rather than accepting them blindly.

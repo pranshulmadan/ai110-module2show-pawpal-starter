@@ -125,11 +125,30 @@ if st.button("Generate schedule"):
         scheduler = Scheduler(
             owner=st.session_state.owner,
             pet=st.session_state.pet,
-            tasks=st.session_state.tasks,
+            tasks=list(st.session_state.tasks),
         )
+        scheduler.sort_by_time()
         daily_plan = scheduler.generate_plan()
+
+        if scheduler.conflict_warnings:
+            for warning in scheduler.conflict_warnings:
+                st.warning(warning)
+
         if daily_plan:
             st.success("Schedule generated successfully.")
+            st.table(
+                [
+                    {
+                        "Task": task.task_name,
+                        "Time": task.preferred_time,
+                        "Duration": task.duration,
+                        "Priority": task.priority,
+                        "Required": task.is_required,
+                    }
+                    for task in daily_plan
+                ]
+            )
+            st.markdown("**Plan details:**")
             st.write(scheduler.explain_plan())
         else:
             st.info("No tasks could be scheduled based on current availability.")

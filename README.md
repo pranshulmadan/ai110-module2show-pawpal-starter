@@ -43,7 +43,7 @@ pip install -r requirements.txt
 7. Refine UML so it matches what you actually built.
 
 
-Smarter Scheduling
+Smarter Scheduling:
 
 I added recurring task support so Task objects can now store recurrence and due date, and when a daily or weekly task is completed the system can create the next occurrence automatically. I also added a scheduler method to sort tasks by preferred time, plus a conflict detection method that returns warnings when tasks overlap at the same time, including conflicts for the same pet or across pets. Filtering now supports completion status and pet name, and completing a task can enqueue the next recurring task if needed. Finally, the app now persists Owner and Pet in session state and builds real Task objects from the UI, and the script was updated to exercise the new sorting, filtering, and conflict detection behavior.
 
@@ -54,3 +54,19 @@ python -m pytest
 The tests cover basic task completion and pet task assignment, verify sorting tasks by preferred time, creating the next occurrence for daily recurring tasks, and detecting same-time conflict warnings for both same-pet and cross-pet schedules.
 
 My confidence level is 5 based on the Test Results.
+
+
+Features:
+
+Owner/pet model with preferences and available time
+Task objects with category, duration, priority, preferred time, required flag, completion state, recurrence, and due date
+Scheduler planning algorithm that selects tasks based on owner time, required status, preferences, and priority
+Scheduler.sort_by_time() to order tasks by HH:MM preferred time
+Scheduler.detect_conflicts() to warn about same-time overlaps for the same pet or across pets
+Scheduler.filter_tasks() to query tasks by completion status and pet name
+Recurring task support: completing a daily or weekly task automatically generates the next occurrence with an updated due date
+UI integration that persists owner/pet state, builds real task objects from inputs, and displays sorted schedules and warnings in a table format
+
+Picture Demo:
+
+<a href="Schedule.png" target="_blank"><img src='Schedule.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>.
